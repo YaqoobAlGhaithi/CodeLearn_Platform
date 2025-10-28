@@ -1,10 +1,20 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { z } from "zod";
+import {
+  getCourses,
+  getCourseById,
+  getLessonsByCourseId,
+  getLessonById,
+  getUserProgress,
+  markLessonComplete,
+  getAchievements,
+  getUserAchievements,
+} from "./db";
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
@@ -17,12 +27,56 @@ export const appRouter = router({
     }),
   }),
 
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  // Courses Router
+  courses: router({
+    list: publicProcedure.query(async () => {
+      return await getCourses();
+    }),
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await getCourseById(input.id);
+      }),
+  }),
+
+  // Lessons Router
+  lessons: router({
+    getByCourseId: publicProcedure
+      .input(z.object({ courseId: z.number() }))
+      .query(async ({ input }) => {
+        return await getLessonsByCourseId(input.courseId);
+      }),
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await getLessonById(input.id);
+      }),
+  }),
+
+  // User Progress Router
+  progress: router({
+    getCourseProgress: protectedProcedure
+      .input(z.object({ courseId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return await getUserProgress(ctx.user.id, input.courseId);
+      }),
+    markLessonComplete: protectedProcedure
+      .input(z.object({ courseId: z.number(), lessonId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await markLessonComplete(ctx.user.id, input.courseId, input.lessonId);
+        return { success: true };
+      }),
+  }),
+
+  // Achievements Router
+  achievements: router({
+    list: publicProcedure.query(async () => {
+      return await getAchievements();
+    }),
+    getUserAchievements: protectedProcedure.query(async ({ ctx }) => {
+      return await getUserAchievements(ctx.user.id);
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

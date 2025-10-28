@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, courses, lessons, userProgress, achievements, userAchievements } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,86 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Course queries
+export async function getCourses() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(courses).orderBy(courses.order);
+}
+
+export async function getCourseById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(courses).where(eq(courses.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+// Lesson queries
+export async function getLessonsByCourseId(courseId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(lessons).where(eq(lessons.courseId, courseId)).orderBy(lessons.order);
+}
+
+export async function getLessonById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(lessons).where(eq(lessons.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+// User Progress queries
+export async function getUserProgress(userId: number, courseId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(userProgress).where(
+    and(eq(userProgress.userId, userId), eq(userProgress.courseId, courseId))
+  );
+}
+
+export async function markLessonComplete(userId: number, courseId: number, lessonId: number) {
+  const db = await getDb();
+  if (!db) return;
+  
+  const existing = await db.select().from(userProgress).where(
+    and(
+      eq(userProgress.userId, userId),
+      eq(userProgress.courseId, courseId),
+      eq(userProgress.lessonId, lessonId)
+    )
+  ).limit(1);
+
+  if (existing.length > 0) {
+    await db.update(userProgress).set({
+      isCompleted: 1,
+      completedAt: new Date(),
+    }).where(
+      and(
+        eq(userProgress.userId, userId),
+        eq(userProgress.courseId, courseId),
+        eq(userProgress.lessonId, lessonId)
+      )
+    );
+  } else {
+    await db.insert(userProgress).values({
+      userId,
+      courseId,
+      lessonId,
+      isCompleted: 1,
+      completedAt: new Date(),
+    });
+  }
+}
+
+// Achievement queries
+export async function getAchievements() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(achievements);
+}
+
+export async function getUserAchievements(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(userAchievements).where(eq(userAchievements.userId, userId));
+}
