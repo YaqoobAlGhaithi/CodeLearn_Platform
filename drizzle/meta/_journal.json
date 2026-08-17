@@ -15,6 +15,13 @@
       "when": 1761680578829,
       "tag": "0001_pink_thunderbird",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786984303857,
+      "tag": "0002_powerful_lightspeed",
+      "breakpoints": true
     }
   ]
 }

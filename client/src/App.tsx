@@ -6,9 +6,11 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Courses from "./pages/Courses";
+import CourseDetail from "./pages/CourseDetail";
 import Lesson from "./pages/Lesson";
 import Dashboard from "./pages/Dashboard";
 import CodePlayground from "./pages/CodePlayground";
+import Forum from "./pages/Forum";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -16,10 +18,11 @@ function Router() {
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/courses"} component={Courses} />
-      <Route path={"/course/:courseId"} component={Courses} />
+      <Route path={"/course/:courseId"} component={CourseDetail} />
       <Route path={"/lesson/:courseId/:lessonId"} component={Lesson} />
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/playground"} component={CodePlayground} />
+      <Route path={"/forum"} component={Forum} />
       <Route path={"/about"} component={Home} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

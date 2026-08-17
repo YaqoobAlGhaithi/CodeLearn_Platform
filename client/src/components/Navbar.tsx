@@ -40,6 +40,11 @@ export default function Navbar() {
               ملعب الكود
             </a>
           </Link>
+          <Link href="/forum">
+            <a className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+              المنتدى
+            </a>
+          </Link>
           <Link href="/about">
             <a className="text-sm font-medium text-foreground hover:text-primary transition-colors">
               عن المنصة
@@ -104,7 +109,12 @@ export default function Navbar() {
                 عن المنصة
               </a>
             </Link>
-              <Link href="/playground">
+            <Link href="/forum">
+              <a className="block px-4 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors">
+                المنتدى
+              </a>
+            </Link>
+            <Link href="/playground">
               <a className="block px-4 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors">
                 ملعب الكود
               </a>

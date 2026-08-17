@@ -1,3 +1,5 @@
+import { calculateProgress } from "@shared/learning";
+
 interface ProgressBarProps {
   current: number;
   total: number;
@@ -11,7 +13,7 @@ export default function ProgressBar({
   label,
   showPercentage = true,
 }: ProgressBarProps) {
-  const percentage = total > 0 ? (current / total) * 100 : 0;
+  const percentage = calculateProgress(current, total);
 
   return (
     <div className="space-y-2">

@@ -3,6 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
+import { createCommentInput, createTopicInput } from "@shared/learning";
 import {
   getCourses,
   getCourseById,
@@ -12,6 +13,10 @@ import {
   markLessonComplete,
   getAchievements,
   getUserAchievements,
+  getForumTopics,
+  createForumTopic,
+  getForumComments,
+  createForumComment,
 } from "./db";
 
 export const appRouter = router({
@@ -76,6 +81,29 @@ export const appRouter = router({
     getUserAchievements: protectedProcedure.query(async ({ ctx }) => {
       return await getUserAchievements(ctx.user.id);
     }),
+  }),
+
+  forum: router({
+    topics: publicProcedure.query(async () => {
+      return await getForumTopics();
+    }),
+    createTopic: protectedProcedure
+      .input(createTopicInput)
+      .mutation(async ({ ctx, input }) => {
+        await createForumTopic(ctx.user.id, input.title, input.content, input.category);
+        return { success: true } as const;
+      }),
+    comments: publicProcedure
+      .input(z.object({ topicId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        return await getForumComments(input.topicId);
+      }),
+    createComment: protectedProcedure
+      .input(createCommentInput)
+      .mutation(async ({ ctx, input }) => {
+        await createForumComment(input.topicId, ctx.user.id, input.content);
+        return { success: true } as const;
+      }),
   }),
 });
 

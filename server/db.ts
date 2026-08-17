@@ -1,11 +1,13 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, courses, lessons, userProgress, achievements, userAchievements } from "../drizzle/schema";
+import { 
+  InsertUser, users, courses, lessons, userProgress, 
+  achievements, userAchievements, forumTopics, forumComments 
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
@@ -79,13 +81,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot get user: database not available");
-    return undefined;
-  }
-
+  if (!db) return undefined;
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
-
   return result.length > 0 ? result[0] : undefined;
 }
 
@@ -117,7 +114,7 @@ export async function getLessonById(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// User Progress queries
+// Progress queries
 export async function getUserProgress(userId: number, courseId: number) {
   const db = await getDb();
   if (!db) return [];
@@ -171,4 +168,38 @@ export async function getUserAchievements(userId: number) {
   const db = await getDb();
   if (!db) return [];
   return await db.select().from(userAchievements).where(eq(userAchievements.userId, userId));
+}
+
+// Forum queries
+export async function getForumTopics() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(forumTopics).orderBy(desc(forumTopics.createdAt));
+}
+
+export async function createForumTopic(userId: number, title: string, content: string, category: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(forumTopics).values({
+    userId,
+    title,
+    content,
+    category,
+  });
+}
+
+export async function getForumComments(topicId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(forumComments).where(eq(forumComments.topicId, topicId)).orderBy(forumComments.createdAt);
+}
+
+export async function createForumComment(topicId: number, userId: number, content: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(forumComments).values({
+    topicId,
+    userId,
+    content,
+  });
 }
