@@ -11,9 +11,16 @@ import Lesson from "./pages/Lesson";
 import Dashboard from "./pages/Dashboard";
 import CodePlayground from "./pages/CodePlayground";
 import Forum from "./pages/Forum";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import FAQ from "./pages/FAQ";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Report from "./pages/Report";
+import Sponsorship from "./pages/Sponsorship";
+import Support from "./pages/Support";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
@@ -23,26 +30,24 @@ function Router() {
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/playground"} component={CodePlayground} />
       <Route path={"/forum"} component={Forum} />
-      <Route path={"/about"} component={Home} />
+      <Route path={"/about"} component={About} />
+      <Route path={"/contact"} component={Contact} />
+      <Route path={"/faq"} component={FAQ} />
+      <Route path={"/privacy"} component={Privacy} />
+      <Route path={"/terms"} component={Terms} />
+      <Route path={"/report"} component={Report} />
+      <Route path={"/sponsorship"} component={Sponsorship} />
+      <Route path={"/support"} component={Support} />
       <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
           <Router />
